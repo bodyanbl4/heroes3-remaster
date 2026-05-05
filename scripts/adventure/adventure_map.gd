@@ -13,7 +13,9 @@ const MAP_OFFSET: Vector2 = Vector2(20, 80)
 const HERO_SPEED_PX_PER_SEC: float = 320.0
 
 @onready var hud: CanvasLayer = $HUD
-@onready var resources_label: Label = $HUD/Top/ResourcesLabel
+@onready var gold_label: Label = $HUD/Top/ResourceBar/GoldBox/Label
+@onready var wood_label: Label = $HUD/Top/ResourceBar/WoodBox/Label
+@onready var ore_label: Label = $HUD/Top/ResourceBar/OreBox/Label
 @onready var day_label: Label = $HUD/Top/DayLabel
 @onready var mp_label: Label = $HUD/Top/MovementLabel
 @onready var end_turn_button: Button = $HUD/Top/EndTurnButton
@@ -280,14 +282,9 @@ func _pixel_to_tile(p: Vector2) -> Vector2i:
 
 
 func _refresh_resources_label(_res: Dictionary) -> void:
-	resources_label.text = (
-		"Gold: %d  |  Wood: %d  |  Ore: %d"
-		% [
-			GameState.resources.get("gold", 0),
-			GameState.resources.get("wood", 0),
-			GameState.resources.get("ore", 0),
-		]
-	)
+	gold_label.text = str(GameState.resources.get("gold", 0))
+	wood_label.text = str(GameState.resources.get("wood", 0))
+	ore_label.text = str(GameState.resources.get("ore", 0))
 
 
 func _refresh_mp_label(_pos: Vector2i, mp_left: int) -> void:

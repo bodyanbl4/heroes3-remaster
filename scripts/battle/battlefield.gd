@@ -394,17 +394,26 @@ func _status(msg: String) -> void:
 
 
 func _draw() -> void:
-	# Field background.
+	# Field background. Prefer the AI-painted backdrop; fall back to a solid
+	# grass-colour rectangle when the asset isn't bundled (CI / minimal install).
 	var bg_rect: Rect2 = Rect2(60, 110, 1160, 480)
-	draw_rect(bg_rect, Color(0.36, 0.55, 0.24))
-	# Hex tiles.
+	var backdrop: Texture2D = AssetLoader.get_backdrop("battlefield_grass")
+	if backdrop != null:
+		draw_texture_rect(backdrop, bg_rect, false)
+	else:
+		draw_rect(bg_rect, Color(0.36, 0.55, 0.24))
+	# Hex tiles. Translucent overlay over the backdrop so the painted terrain
+	# shows through; opaque-green fallback when no backdrop is loaded.
+	var has_backdrop: bool = backdrop != null
 	for r in range(HexGrid.ROWS):
 		for c in range(HexGrid.COLS):
 			var coord: Vector2i = Vector2i(c, r)
 			var corners: PackedVector2Array = hex.hex_corners(coord)
-			var fill: Color = Color(0.30, 0.45, 0.20)
+			var fill: Color = (
+				Color(0.30, 0.45, 0.20, 0.18) if has_backdrop else Color(0.30, 0.45, 0.20)
+			)
 			if coord == hovered_hex:
-				fill = Color(0.80, 0.75, 0.20)
+				fill = (Color(0.95, 0.85, 0.25, 0.50) if has_backdrop else Color(0.80, 0.75, 0.20))
 			var colors: PackedColorArray = PackedColorArray()
 			for _i in range(corners.size()):
 				colors.append(fill)
@@ -412,7 +421,7 @@ func _draw() -> void:
 			# Outline.
 			var outline_corners: PackedVector2Array = corners.duplicate()
 			outline_corners.append(corners[0])
-			draw_polyline(outline_corners, Color(0.18, 0.28, 0.12), 1.0)
+			draw_polyline(outline_corners, Color(0.18, 0.28, 0.12, 0.80), 1.0)
 	# Units.
 	for u in units:
 		if not (u as BattleUnit).is_alive():
@@ -420,7 +429,12 @@ func _draw() -> void:
 		var unit: BattleUnit = u as BattleUnit
 		var center: Vector2 = hex.hex_to_pixel(unit.coord)
 		var faction_token: StringName = &"blue" if unit.side == BattleUnit.Side.PLAYER else &"red"
-		var unit_tex: Texture2D = AssetLoader.get_faction_unit_sprite(faction_token)
+		# Prefer the AI-generated per-creature sprite; fall back to the Kenney
+		# faction-coloured token when the creature has no AI art yet.
+		var unit_tex: Texture2D = AssetLoader.get_ai_creature_sprite(unit.name)
+		var is_ai: bool = unit_tex != null
+		if not is_ai:
+			unit_tex = AssetLoader.get_faction_unit_sprite(faction_token)
 		var footprint: Color = (
 			Color(0.10, 0.30, 0.85, 0.45)
 			if unit.side == BattleUnit.Side.PLAYER
@@ -428,9 +442,30 @@ func _draw() -> void:
 		)
 		draw_circle(center + Vector2(0, HEX_SIZE * 0.45), HEX_SIZE * 0.4, footprint)
 		if unit_tex != null:
-			var tex_size: Vector2 = unit_tex.get_size()
-			var sprite_rect := Rect2(center - tex_size * 0.5, tex_size)
-			draw_texture_rect(unit_tex, sprite_rect, false)
+			# AI sprites are 256x256 and need to be scaled down to roughly fit
+			# inside one hex (the figure occupies ~70 % of the frame). Kenney
+			# sprites are already tiny (32x32 of useful pixels in a 64x64 PNG)
+			# so we draw them at native size.
+			var draw_size: Vector2 = (
+				Vector2(HEX_SIZE * 2.6, HEX_SIZE * 2.6) if is_ai else unit_tex.get_size()
+			)
+			# Anchor sprite so feet sit on the hex centre rather than the
+			# bounding box centre.
+			var anchor: Vector2 = (
+				center - Vector2(draw_size.x * 0.5, draw_size.y * 0.85)
+				if is_ai
+				else center - unit_tex.get_size() * 0.5
+			)
+			var sprite_rect := Rect2(anchor, draw_size)
+			# Mirror enemy sprites so they face the player side.
+			if unit.side != BattleUnit.Side.PLAYER and is_ai:
+				draw_set_transform(center, 0.0, Vector2(-1, 1))
+				draw_texture_rect(
+					unit_tex, Rect2(-draw_size * Vector2(0.5, 0.85), draw_size), false
+				)
+				draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			else:
+				draw_texture_rect(unit_tex, sprite_rect, false)
 		else:
 			# Procedural fallback when the Kenney pack isn't bundled.
 			var ring: Color = (
