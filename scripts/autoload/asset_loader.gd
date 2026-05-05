@@ -1,23 +1,56 @@
 extends Node
 ## Loads sprites, sounds and data tables.
 ##
-## The engine remake works with original Heroes of Might and Magic III
-## archives stored on the user's machine. The user supplies the path via
-## SettingsManager. We never bundle copyrighted assets in this repository.
+## Three sources are supported, in order of preference:
 ##
-## When the H3 path is missing or invalid, we fall back to programmatically
-## generated placeholder textures so development and CI can run without the
-## original game.
+## 1. Original Heroes of Might and Magic III archives, if the user pointed
+##    SettingsManager at a real H3 install. Parsing of `.lod`/`.def`/`.pcx`
+##    is wired up incrementally — see `ROADMAP.md`. We never bundle
+##    copyrighted H3 assets in this repository.
+##
+## 2. Bundled CC0 fallback art (Kenney's "Medieval RTS" pack, public domain).
+##    Lives under `assets/cc0/kenney_medieval_rts/`. Used when there is no H3
+##    install or while real-asset parsers are still in flight.
+##
+## 3. Procedural placeholders generated at runtime as a last-resort fallback
+##    so CI and headless tests never break on a missing file.
 
 const PLACEHOLDER_TILE_SIZE: int = 64
 const PLACEHOLDER_HEX_RADIUS: int = 32
 
-enum Source { ORIGINAL_H3, PLACEHOLDER }
+## Folders inside `res://assets/cc0/kenney_medieval_rts/`.
+const KENNEY_TILES_DIR: String = "res://assets/cc0/kenney_medieval_rts/tiles"
+const KENNEY_UNITS_DIR: String = "res://assets/cc0/kenney_medieval_rts/units"
+const KENNEY_ENV_DIR: String = "res://assets/cc0/kenney_medieval_rts/environment"
+const KENNEY_STRUCT_DIR: String = "res://assets/cc0/kenney_medieval_rts/structures"
 
-var current_source: Source = Source.PLACEHOLDER
+## Hand-picked Kenney tiles for each Tile.Terrain. The pack has 58 tiles; we
+## chose the ones that look "pure" (no road, no border decoration) so the map
+## reads cleanly. Variants per terrain enable subtle visual variation.
+const KENNEY_TERRAIN_TILES: Dictionary = {
+	&"grass": ["medievalTile_57.png", "medievalTile_58.png"],
+	&"dirt": ["medievalTile_13.png"],
+	&"sand": ["medievalTile_02.png"],
+	&"water": ["medievalTile_28.png"],
+	&"rock": ["medievalTile_15.png"],
+	&"tree": ["medievalTile_42.png", "medievalTile_44.png"],
+}
 
-# Cached generated placeholder textures, keyed by descriptor.
-var _placeholder_cache: Dictionary = {}
+## Faction-coloured unit sprites. Index by faction colour; each entry is a
+## representative knight token used on the adventure map / battle field.
+const KENNEY_UNITS_BY_FACTION: Dictionary = {
+	"blue": "medievalUnit_01.png",
+	"red": "medievalUnit_09.png",
+	"green": "medievalUnit_13.png",
+	"orange": "medievalUnit_18.png",
+}
+
+enum Source { ORIGINAL_H3, KENNEY_CC0, PLACEHOLDER }
+
+var current_source: Source = Source.KENNEY_CC0
+
+# Cached generated/loaded textures, keyed by descriptor.
+var _cache: Dictionary = {}
 
 
 func _ready() -> void:
@@ -28,7 +61,12 @@ func _ready() -> void:
 func _refresh_source() -> void:
 	var path: String = SettingsManager.h3_data_path
 	if path.is_empty() or not _looks_like_h3_install(path):
-		current_source = Source.PLACEHOLDER
+		# Prefer Kenney CC0 over generated placeholders when the bundled
+		# pack is present (which it always is in CI / a normal checkout).
+		if _kenney_pack_present():
+			current_source = Source.KENNEY_CC0
+		else:
+			current_source = Source.PLACEHOLDER
 	else:
 		current_source = Source.ORIGINAL_H3
 
@@ -51,28 +89,91 @@ func _looks_like_h3_install(path: String) -> bool:
 	return false
 
 
-## Returns a tile texture for an adventure-map terrain type. When the user has
-## supplied original H3 files, this would route to the LOD/DEF parser. For now
-## we always generate a placeholder.
-func get_terrain_tile(terrain: StringName) -> Texture2D:
-	var key: String = "terrain:%s" % terrain
-	if _placeholder_cache.has(key):
-		return _placeholder_cache[key]
+func _kenney_pack_present() -> bool:
+	# The grass tile is required; if it's missing, the pack is broken and we
+	# silently fall back to procedural tiles.
+	return ResourceLoader.exists(KENNEY_TILES_DIR.path_join("medievalTile_57.png"))
+
+
+## Returns a tile texture for an adventure-map terrain type. Picks a
+## deterministic variant based on `variant` (typically row*width+col so the
+## map looks stable across redraws but varied across tiles).
+func get_terrain_tile(terrain: StringName, variant: int = 0) -> Texture2D:
+	if current_source == Source.KENNEY_CC0:
+		var tex: Texture2D = _load_kenney_terrain(terrain, variant)
+		if tex != null:
+			return tex
+	# Procedural fallback.
+	var key: String = "placeholder:terrain:%s" % terrain
+	if _cache.has(key):
+		return _cache[key]
 	var color: Color = _color_for_terrain(terrain)
-	var tex: Texture2D = _make_solid_tile(color, PLACEHOLDER_TILE_SIZE)
-	_placeholder_cache[key] = tex
+	var fallback: Texture2D = _make_solid_tile(color, PLACEHOLDER_TILE_SIZE)
+	_cache[key] = fallback
+	return fallback
+
+
+func _load_kenney_terrain(terrain: StringName, variant: int) -> Texture2D:
+	var variants: Array = KENNEY_TERRAIN_TILES.get(terrain, [])
+	if variants.is_empty():
+		return null
+	var sprite_name: String = variants[variant % variants.size()]
+	var key: String = "kenney:tile:%s" % sprite_name
+	if _cache.has(key):
+		return _cache[key]
+	var path: String = KENNEY_TILES_DIR.path_join(sprite_name)
+	if not ResourceLoader.exists(path):
+		return null
+	var tex: Texture2D = load(path) as Texture2D
+	_cache[key] = tex
 	return tex
 
 
-## Returns a creature portrait/sprite by id. Used by combat HUD. Always
-## placeholder for now.
+## Returns a creature portrait/sprite by id. Used by combat HUD. Currently
+## returns a coloured token; richer per-creature art arrives in a later PR.
 func get_creature_sprite(creature_id: StringName, faction_color: Color) -> Texture2D:
 	var key: String = "creature:%s:%s" % [creature_id, faction_color.to_html()]
-	if _placeholder_cache.has(key):
-		return _placeholder_cache[key]
+	if _cache.has(key):
+		return _cache[key]
 	var tex: Texture2D = _make_creature_token(faction_color, PLACEHOLDER_HEX_RADIUS)
-	_placeholder_cache[key] = tex
+	_cache[key] = tex
 	return tex
+
+
+## Returns a faction-tinted Kenney unit sprite for use as a hero / squad
+## token on the adventure map. Falls back to the procedural creature token
+## when the CC0 pack isn't available.
+func get_faction_unit_sprite(faction: StringName) -> Texture2D:
+	var faction_str: String = String(faction)
+	if current_source == Source.KENNEY_CC0:
+		var sprite_name: String = KENNEY_UNITS_BY_FACTION.get(faction_str, "")
+		if not sprite_name.is_empty():
+			var key: String = "kenney:unit:%s" % sprite_name
+			if _cache.has(key):
+				return _cache[key]
+			var path: String = KENNEY_UNITS_DIR.path_join(sprite_name)
+			if ResourceLoader.exists(path):
+				var tex: Texture2D = load(path) as Texture2D
+				_cache[key] = tex
+				return tex
+	# Procedural fallback: use a coloured token in the requested faction
+	# colour.
+	var color: Color = _color_for_faction(faction_str)
+	return _make_creature_token(color, PLACEHOLDER_HEX_RADIUS)
+
+
+func _color_for_faction(faction: String) -> Color:
+	match faction:
+		"blue":
+			return Color(0.35, 0.55, 0.95)
+		"red":
+			return Color(0.85, 0.25, 0.25)
+		"green":
+			return Color(0.30, 0.65, 0.35)
+		"orange":
+			return Color(0.95, 0.55, 0.20)
+		_:
+			return Color(0.6, 0.6, 0.6)
 
 
 func _color_for_terrain(terrain: StringName) -> Color:
