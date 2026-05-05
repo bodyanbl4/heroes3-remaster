@@ -319,18 +319,17 @@ func _draw() -> void:
 			draw_line(p_a, p_b, Color(1.0, 0.95, 0.2, 0.85), 3.0)
 		var dst: Vector2 = _tile_to_pixel(_pending_path[_pending_path.size() - 1])
 		draw_circle(dst, 10.0, Color(1.0, 0.95, 0.2, 0.6))
-	# Hero last so they sit on top.
-	draw_circle(_hero_pixel_pos, 22.0, Color(0.10, 0.30, 0.85, 1.0))
-	draw_circle(_hero_pixel_pos, 22.0 - 3.0, Color(0.45, 0.65, 1.0, 1.0))
-	draw_string(
-		ThemeDB.fallback_font,
-		_hero_pixel_pos + Vector2(-8, 6),
-		"H",
-		HORIZONTAL_ALIGNMENT_LEFT,
-		-1,
-		18,
-		Color.WHITE
-	)
+	# Hero last so they sit on top. A Kenney knight sprite stands in for the
+	# placeholder blue disc; the disc remains as a faded "footprint" so the
+	# hero is still distinguishable on busy terrain.
+	var hero_tex: Texture2D = AssetLoader.get_faction_unit_sprite(&"blue")
+	draw_circle(_hero_pixel_pos + Vector2(0, 18), 18.0, Color(0.10, 0.20, 0.55, 0.45))
+	if hero_tex != null:
+		var tex_size: Vector2 = hero_tex.get_size()
+		var rect := Rect2(_hero_pixel_pos - tex_size * 0.5, tex_size)
+		draw_texture_rect(hero_tex, rect, false)
+	else:
+		draw_circle(_hero_pixel_pos, 22.0, Color(0.10, 0.30, 0.85, 1.0))
 
 
 func _draw_tile_object(tile: Tile, origin: Vector2) -> void:
@@ -353,15 +352,25 @@ func _draw_tile_object(tile: Tile, origin: Vector2) -> void:
 			draw_circle(center, 12.0, Color(0.55, 0.55, 0.60))
 			draw_circle(center + Vector2(6, -3), 6.0, Color(0.70, 0.70, 0.75))
 		Tile.ObjectKind.MONSTER:
-			draw_circle(center, 18.0, Color(0.75, 0.10, 0.10))
-			draw_string(
+			# Footprint disc + Kenney red sprite, identical layout to the
+			# hero so the visual language is consistent.
+			draw_circle(center + Vector2(0, 18), 16.0, Color(0.50, 0.10, 0.10, 0.45))
+			var enemy_tex: Texture2D = AssetLoader.get_faction_unit_sprite(&"red")
+			if enemy_tex != null:
+				var tex_size: Vector2 = enemy_tex.get_size()
+				var rect := Rect2(center - tex_size * 0.5, tex_size)
+				draw_texture_rect(enemy_tex, rect, false)
+			else:
+				draw_circle(center, 18.0, Color(0.75, 0.10, 0.10))
+			draw_string_outline(
 				ThemeDB.fallback_font,
-				center + Vector2(-7, 6),
-				"!",
+				origin + Vector2(2, TILE_SIZE - 4),
+				tile.monster_label,
 				HORIZONTAL_ALIGNMENT_LEFT,
 				-1,
-				22,
-				Color.WHITE
+				12,
+				2,
+				Color.BLACK
 			)
 			draw_string(
 				ThemeDB.fallback_font,

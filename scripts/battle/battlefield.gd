@@ -419,13 +419,27 @@ func _draw() -> void:
 			continue
 		var unit: BattleUnit = u as BattleUnit
 		var center: Vector2 = hex.hex_to_pixel(unit.coord)
-		var ring: Color = (
-			Color(0.10, 0.30, 0.85)
+		var faction_token: StringName = &"blue" if unit.side == BattleUnit.Side.PLAYER else &"red"
+		var unit_tex: Texture2D = AssetLoader.get_faction_unit_sprite(faction_token)
+		var footprint: Color = (
+			Color(0.10, 0.30, 0.85, 0.45)
 			if unit.side == BattleUnit.Side.PLAYER
-			else Color(0.85, 0.15, 0.15)
+			else Color(0.85, 0.15, 0.15, 0.45)
 		)
-		draw_circle(center, HEX_SIZE * 0.7, ring)
-		draw_circle(center, HEX_SIZE * 0.55, unit.color)
+		draw_circle(center + Vector2(0, HEX_SIZE * 0.45), HEX_SIZE * 0.4, footprint)
+		if unit_tex != null:
+			var tex_size: Vector2 = unit_tex.get_size()
+			var sprite_rect := Rect2(center - tex_size * 0.5, tex_size)
+			draw_texture_rect(unit_tex, sprite_rect, false)
+		else:
+			# Procedural fallback when the Kenney pack isn't bundled.
+			var ring: Color = (
+				Color(0.10, 0.30, 0.85)
+				if unit.side == BattleUnit.Side.PLAYER
+				else Color(0.85, 0.15, 0.15)
+			)
+			draw_circle(center, HEX_SIZE * 0.7, ring)
+			draw_circle(center, HEX_SIZE * 0.55, unit.color)
 		var label: String = "%s\n×%d" % [unit.name, unit.count]
 		draw_string_outline(
 			ThemeDB.fallback_font,
