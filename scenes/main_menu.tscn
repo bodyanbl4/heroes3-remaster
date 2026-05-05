@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://b8x1kqr2hg7m1"]
+[gd_scene load_steps=3 format=3 uid="uid://b8x1kqr2hg7m1"]
 
 [ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_main_menu"]
+[ext_resource type="Texture2D" path="res://assets/ai_generated/backdrops/main_menu.jpg" id="2_backdrop"]
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -20,18 +21,41 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.094, 0.094, 0.18, 1)
 
+[node name="Backdrop" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_backdrop")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Vignette" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0.04, 0.30)
+
 [node name="TitleLabel" type="Label" parent="."]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -380.0
-offset_top = 80.0
+offset_top = 60.0
 offset_right = 380.0
-offset_bottom = 160.0
+offset_bottom = 140.0
 grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 0.95, 0.78, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
 theme_override_font_sizes/font_size = 56
-text = "Heroes 3 Remaster"
+text = "Heroes 3 Remaster — Halendor"
 horizontal_alignment = 1
 
 [node name="SubtitleLabel" type="Label" parent="."]
@@ -40,14 +64,16 @@ anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -400.0
-offset_top = 150.0
+offset_top = 132.0
 offset_right = 400.0
-offset_bottom = 180.0
+offset_bottom = 162.0
 grow_horizontal = 2
+theme_override_colors/font_color = Color(0.95, 0.92, 0.80, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
 theme_override_font_sizes/font_size = 18
-text = "Open-source engine remake — original game files required for full assets"
+text = "An original Heroes-style strategy game in the world of Halendor"
 horizontal_alignment = 1
-modulate = Color(0.78, 0.78, 0.86, 1)
 
 [node name="Panel" type="PanelContainer" parent="."]
 layout_mode = 1

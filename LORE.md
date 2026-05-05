@@ -289,26 +289,38 @@ reproducibility and so a different artist can pick up where Grok left off.
 | Asset | File | Prompt | Tool / ratio |
 |---|---|---|---|
 | Sir Artan portrait | `assets/ai_generated/heroes/sir_artan_portrait.png` | Section 2.1 above | Grok 2:3 Tall (720×1280) |
+| Pikeman sprite | `assets/ai_generated/units/pikeman.png` | Section 2.1 + unit prefix | Grok 1:1 Square |
+| Crossbowman sprite | `assets/ai_generated/units/crossbowman.png` | Section 2.1 + unit prefix | Grok 1:1 Square |
+| Squire sprite | `assets/ai_generated/units/squire.png` | Section 2.1 + unit prefix | Grok 1:1 Square |
+| Griffin sprite | `assets/ai_generated/units/griffin.png` | Section 2.1 + unit prefix | Grok 1:1 Square |
+| Monk sprite | `assets/ai_generated/units/monk.png` | Section 2.1 + unit prefix | Grok 1:1 Square |
+| Cavalier sprite | `assets/ai_generated/units/cavalier.png` | Section 2.1 + unit prefix | Grok 1:1 Square |
+| Angel sprite | `assets/ai_generated/units/angel.png` | Section 2.1 + unit prefix | Grok 1:1 Square |
+| Gold icon | `assets/ai_generated/icons/gold.png` | Resource-icon prefix + sun-stamped coin pile | Grok 1:1 Square |
+| Wood icon | `assets/ai_generated/icons/wood.png` | Resource-icon prefix + chopped logs | Grok 1:1 Square |
+| Ore icon | `assets/ai_generated/icons/ore.png` | Resource-icon prefix + iron ore chunks | Grok 1:1 Square |
+| Crystal icon | `assets/ai_generated/icons/crystal.png` | Resource-icon prefix + glowing blue crystals | Grok 1:1 Square |
+| Mercury icon | `assets/ai_generated/icons/mercury.png` | Resource-icon prefix + mercury chalice | Grok 1:1 Square |
+| Sulfur icon | `assets/ai_generated/icons/sulfur.png` | Resource-icon prefix + sulfur crystals | Grok 1:1 Square |
+| Gems icon | `assets/ai_generated/icons/gems.png` | Resource-icon prefix + multi-coloured cut stones | Grok 1:1 Square |
+| Main menu backdrop | `assets/ai_generated/backdrops/main_menu.jpg` | Halendor castle at sunrise | Grok 16:9 Widescreen (1280×720) |
+| Battlefield backdrop | `assets/ai_generated/backdrops/battlefield_grass.jpg` | Empty grassy meadow, isometric | Grok 16:9 Widescreen (1280×720) |
 
 ### To generate (queue)
 
 | Asset | Prompt source | Target file | Grok ratio |
 |---|---|---|---|
-| Pikeman sprite | Section 2.1 + unit prefix | `assets/ai_generated/units/dawn/pikeman.png` | 1:1 Square |
-| Crossbowman sprite | Section 2.1 + unit prefix | `assets/ai_generated/units/dawn/crossbowman.png` | 1:1 Square |
-| Squire sprite | Section 2.1 + unit prefix | `assets/ai_generated/units/dawn/squire.png` | 1:1 Square |
-| Griffin sprite | Section 2.1 + unit prefix | `assets/ai_generated/units/dawn/griffin.png` | 1:1 Square |
-| Monk sprite | Section 2.1 + unit prefix | `assets/ai_generated/units/dawn/monk.png` | 1:1 Square |
-| Cavalier sprite | Section 2.1 + unit prefix | `assets/ai_generated/units/dawn/cavalier.png` | 1:1 Square |
-| Angel sprite | Section 2.1 + unit prefix | `assets/ai_generated/units/dawn/angel.png` | 1:1 Square |
-| Resource icons (×7) | Section "Иконки ресурсов" in chat | `assets/ai_generated/icons/*.png` | 1:1 Square |
-| Main menu backdrop | Section "Главное меню" in chat | `assets/ai_generated/backdrops/main_menu.png` | 16:9 Widescreen |
-| Battlefield backdrop | Section "Поле боя" in chat | `assets/ai_generated/backdrops/battle_grass.png` | 16:9 Widescreen |
+| Sir Artan world sprite | "Артан на карте" prompt block | `assets/ai_generated/heroes/sir_artan_world.png` | 1:1 Square |
+| Spell icon: Bless | Section 4 spell-icon prefix | `assets/ai_generated/icons/spell_bless.png` | 1:1 Square |
+| Spell icon: Haste | Section 4 spell-icon prefix | `assets/ai_generated/icons/spell_haste.png` | 1:1 Square |
+| Spell icon: Slow | Section 4 spell-icon prefix | `assets/ai_generated/icons/spell_slow.png` | 1:1 Square |
+| Spell icon: Fire Bolt | Section 4 spell-icon prefix | `assets/ai_generated/icons/spell_fire_bolt.png` | 1:1 Square |
 | Lord Vexhal portrait | Section 2.2 antagonist | `assets/ai_generated/heroes/lord_vexhal_portrait.png` | 2:3 Tall |
 
-Backgrounds in unit / icon images are removed automatically by the
-`scripts/tools/strip_background.py` helper (uses `rembg`). Portraits and
-backdrops keep their painted backgrounds.
+Backgrounds in unit images are removed automatically by passing the raw
+JPG/PNG through `rembg` (a one-shot Python script). Resource icons keep
+their dark gradient background which blends well with the dark HUD bar.
+Portraits and backdrops keep their painted backgrounds.
 
 ### Unit-prompt prefix
 

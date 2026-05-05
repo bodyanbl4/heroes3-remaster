@@ -1,7 +1,10 @@
-[gd_scene load_steps=3 format=3 uid="uid://c7ksm4dnsh82a"]
+[gd_scene load_steps=6 format=3 uid="uid://c7ksm4dnsh82a"]
 
 [ext_resource type="Script" path="res://scripts/adventure/adventure_map.gd" id="1_adventure"]
 [ext_resource type="Texture2D" path="res://assets/ai_generated/heroes/sir_artan_portrait.png" id="2_artan"]
+[ext_resource type="Texture2D" path="res://assets/ai_generated/icons/gold.png" id="3_gold"]
+[ext_resource type="Texture2D" path="res://assets/ai_generated/icons/wood.png" id="4_wood"]
+[ext_resource type="Texture2D" path="res://assets/ai_generated/icons/ore.png" id="5_ore"]
 
 [node name="AdventureMap" type="Node2D"]
 script = ExtResource("1_adventure")
@@ -30,11 +33,52 @@ custom_minimum_size = Vector2(120, 0)
 theme_override_font_sizes/font_size = 18
 text = "Day 1"
 
-[node name="ResourcesLabel" type="Label" parent="HUD/Top"]
+[node name="ResourceBar" type="HBoxContainer" parent="HUD/Top"]
 size_flags_horizontal = 3
+alignment = 1
+theme_override_constants/separation = 24
+
+[node name="GoldBox" type="HBoxContainer" parent="HUD/Top/ResourceBar"]
+theme_override_constants/separation = 6
+
+[node name="Icon" type="TextureRect" parent="HUD/Top/ResourceBar/GoldBox"]
+custom_minimum_size = Vector2(36, 36)
+texture = ExtResource("3_gold")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="HUD/Top/ResourceBar/GoldBox"]
 theme_override_font_sizes/font_size = 16
-text = "Gold: --  |  Wood: --  |  Ore: --"
-horizontal_alignment = 1
+text = "--"
+vertical_alignment = 1
+
+[node name="WoodBox" type="HBoxContainer" parent="HUD/Top/ResourceBar"]
+theme_override_constants/separation = 6
+
+[node name="Icon" type="TextureRect" parent="HUD/Top/ResourceBar/WoodBox"]
+custom_minimum_size = Vector2(36, 36)
+texture = ExtResource("4_wood")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="HUD/Top/ResourceBar/WoodBox"]
+theme_override_font_sizes/font_size = 16
+text = "--"
+vertical_alignment = 1
+
+[node name="OreBox" type="HBoxContainer" parent="HUD/Top/ResourceBar"]
+theme_override_constants/separation = 6
+
+[node name="Icon" type="TextureRect" parent="HUD/Top/ResourceBar/OreBox"]
+custom_minimum_size = Vector2(36, 36)
+texture = ExtResource("5_ore")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="HUD/Top/ResourceBar/OreBox"]
+theme_override_font_sizes/font_size = 16
+text = "--"
+vertical_alignment = 1
 
 [node name="MovementLabel" type="Label" parent="HUD/Top"]
 custom_minimum_size = Vector2(220, 0)

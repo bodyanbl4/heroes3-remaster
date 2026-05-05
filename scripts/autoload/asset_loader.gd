@@ -24,6 +24,44 @@ const KENNEY_UNITS_DIR: String = "res://assets/cc0/kenney_medieval_rts/units"
 const KENNEY_ENV_DIR: String = "res://assets/cc0/kenney_medieval_rts/environment"
 const KENNEY_STRUCT_DIR: String = "res://assets/cc0/kenney_medieval_rts/structures"
 
+## Folders inside `res://assets/ai_generated/` — original AI-generated art for
+## the Halendor world. See `LORE.md` Section 4 for the prompt index and the
+## generation workflow.
+const AI_UNITS_DIR: String = "res://assets/ai_generated/units"
+const AI_ICONS_DIR: String = "res://assets/ai_generated/icons"
+const AI_BACKDROPS_DIR: String = "res://assets/ai_generated/backdrops"
+const AI_HEROES_DIR: String = "res://assets/ai_generated/heroes"
+
+## Per-creature AI sprite filenames. Keys match the unit names shown in the
+## battle log (CreaturesDB.UNITS) and the LORE.md Dawn-faction roster. When a
+## creature has no AI art yet the loader falls back to the faction-coloured
+## Kenney token.
+const AI_UNIT_SPRITES: Dictionary = {
+	"Pikeman": "pikeman.png",
+	"Crossbowman": "crossbowman.png",
+	"Squire": "squire.png",
+	"Griffin": "griffin.png",
+	"Monk": "monk.png",
+	"Cavalier": "cavalier.png",
+	"Angel": "angel.png",
+	# Aliases for the placeholder names still used in the old battle setup
+	# (CreaturesDB returns "Archer" / "Swordsman" — map them to the Halendor
+	# canonical Crossbowman / Squire so the AI art shows up immediately).
+	"Archer": "crossbowman.png",
+	"Swordsman": "squire.png",
+}
+
+## Resource icons keyed by GameState.RESOURCES.
+const AI_RESOURCE_ICONS: Dictionary = {
+	"gold": "gold.png",
+	"wood": "wood.png",
+	"ore": "ore.png",
+	"crystal": "crystal.png",
+	"mercury": "mercury.png",
+	"sulfur": "sulfur.png",
+	"gems": "gems.png",
+}
+
 ## Hand-picked Kenney tiles for each Tile.Terrain. The pack has 58 tiles; we
 ## chose the ones that look "pure" (no road, no border decoration) so the map
 ## reads cleanly. Variants per terrain enable subtle visual variation.
@@ -138,6 +176,79 @@ func get_creature_sprite(creature_id: StringName, faction_color: Color) -> Textu
 	var tex: Texture2D = _make_creature_token(faction_color, PLACEHOLDER_HEX_RADIUS)
 	_cache[key] = tex
 	return tex
+
+
+## Returns an AI-generated full-body sprite for a named creature, or null when
+## the creature isn't in the AI roster yet. Caller is expected to fall back to
+## `get_faction_unit_sprite()` for unknown creatures.
+func get_ai_creature_sprite(creature_name: String) -> Texture2D:
+	var fname: String = AI_UNIT_SPRITES.get(creature_name, "")
+	if fname.is_empty():
+		return null
+	var key: String = "ai:unit:%s" % fname
+	if _cache.has(key):
+		return _cache[key]
+	var path: String = AI_UNITS_DIR.path_join(fname)
+	if not ResourceLoader.exists(path):
+		return null
+	var tex: Texture2D = load(path) as Texture2D
+	_cache[key] = tex
+	return tex
+
+
+## Returns an AI-generated icon for a resource id ("gold", "wood", ...). Falls
+## back to a coloured square when the icon isn't available so the HUD always
+## renders something.
+func get_resource_icon(resource_id: String) -> Texture2D:
+	var fname: String = AI_RESOURCE_ICONS.get(resource_id, "")
+	if not fname.is_empty():
+		var key: String = "ai:icon:%s" % fname
+		if _cache.has(key):
+			return _cache[key]
+		var path: String = AI_ICONS_DIR.path_join(fname)
+		if ResourceLoader.exists(path):
+			var tex: Texture2D = load(path) as Texture2D
+			_cache[key] = tex
+			return tex
+	# Procedural fallback: coloured square keyed by resource id so different
+	# resources at least look distinct in headless tests.
+	var fallback_color: Color = _color_for_resource(resource_id)
+	return _make_solid_tile(fallback_color, 32)
+
+
+## Returns an AI-generated backdrop by short name ("main_menu",
+## "battlefield_grass"). Returns null when not present so the caller can apply
+## a procedural fallback (e.g. solid colour).
+func get_backdrop(name: String) -> Texture2D:
+	var key: String = "ai:backdrop:%s" % name
+	if _cache.has(key):
+		return _cache[key]
+	var path: String = AI_BACKDROPS_DIR.path_join("%s.jpg" % name)
+	if not ResourceLoader.exists(path):
+		return null
+	var tex: Texture2D = load(path) as Texture2D
+	_cache[key] = tex
+	return tex
+
+
+func _color_for_resource(resource_id: String) -> Color:
+	match resource_id:
+		"gold":
+			return Color(0.95, 0.78, 0.22)
+		"wood":
+			return Color(0.55, 0.36, 0.20)
+		"ore":
+			return Color(0.55, 0.55, 0.60)
+		"crystal":
+			return Color(0.30, 0.65, 0.95)
+		"mercury":
+			return Color(0.85, 0.85, 0.92)
+		"sulfur":
+			return Color(0.95, 0.85, 0.25)
+		"gems":
+			return Color(0.85, 0.30, 0.55)
+		_:
+			return Color(0.5, 0.5, 0.5)
 
 
 ## Returns a faction-tinted Kenney unit sprite for use as a hero / squad
