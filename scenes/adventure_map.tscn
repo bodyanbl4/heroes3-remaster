@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://c7ksm4dnsh82a"]
+[gd_scene load_steps=3 format=3 uid="uid://c7ksm4dnsh82a"]
 
 [ext_resource type="Script" path="res://scripts/adventure/adventure_map.gd" id="1_adventure"]
+[ext_resource type="Texture2D" path="res://assets/ai_generated/heroes/sir_artan_portrait.png" id="2_artan"]
 
 [node name="AdventureMap" type="Node2D"]
 script = ExtResource("1_adventure")
@@ -46,6 +47,32 @@ text = "End Turn"
 
 [node name="MenuButton" type="Button" parent="HUD/Top"]
 text = "Menu"
+
+[node name="HeroPanel" type="PanelContainer" parent="HUD"]
+offset_left = 16.0
+offset_top = 480.0
+offset_right = 220.0
+offset_bottom = 656.0
+
+[node name="HeroBox" type="VBoxContainer" parent="HUD/HeroPanel"]
+theme_override_constants/separation = 4
+
+[node name="Portrait" type="TextureRect" parent="HUD/HeroPanel/HeroBox"]
+custom_minimum_size = Vector2(192, 128)
+texture = ExtResource("2_artan")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="HeroName" type="Label" parent="HUD/HeroPanel/HeroBox"]
+theme_override_font_sizes/font_size = 16
+text = "Sir Artan Light-of-the-Hold"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="HeroLevel" type="Label" parent="HUD/HeroPanel/HeroBox"]
+theme_override_font_sizes/font_size = 13
+text = "Level 1 Knight  |  Dawn"
+horizontal_alignment = 1
 
 [node name="Bottom" type="PanelContainer" parent="HUD"]
 offset_left = 16.0

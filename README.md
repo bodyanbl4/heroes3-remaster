@@ -1,10 +1,16 @@
-# Heroes 3 Remaster
+# Heroes 3 Remaster — *Halendor*
 
-An open-source engine remake of *Heroes of Might and Magic III* (3DO/New World Computing, 1999) built with [Godot 4](https://godotengine.org/).
+An open-source turn-based fantasy strategy game built with [Godot 4](https://godotengine.org/). Heroes-of-Might-and-Magic-style mechanics (adventure map → hex-grid combat → town building) wrapped around an entirely original world, **Halendor**, with original lore, factions, and creatures (see [LORE.md](LORE.md)).
 
-This repository contains **only original code and programmatically generated placeholder graphics**. It is an *engine reimplementation*: it is designed to load the user's own legitimately-purchased Heroes 3 install (the same approach taken by [VCMI](https://vcmi.eu/) and [OpenMW](https://openmw.org/)). No copyrighted assets from Heroes 3 are bundled, will be bundled, or are required for development.
+The project started life as a Heroes 3 *engine reimplementation* in the spirit of [VCMI](https://vcmi.eu/) / [OpenMW](https://openmw.org/) — and that path remains supported: an `AssetLoader` plug-in slot can still load a user-supplied legitimate H3 install at runtime if/when `.lod`/`.def`/`.pcx` parsers are implemented. The project itself, however, ships its **own** content: CC0 fallback art today, AI-generated original art landing in subsequent PRs.
 
-> **Status: pre-alpha MVP.** This is a tiny vertical slice — adventure-map traversal and a simplified hex-grid battle. Most of the original game (towns, magic, AI strategy, campaigns, multiplayer) is not yet implemented. See [ROADMAP.md](ROADMAP.md).
+This repository therefore contains:
+- 100 % original code (GPL-3.0, this repository's licence);
+- Bundled Kenney *Medieval RTS* art under CC0 (see `assets/cc0/kenney_medieval_rts/LICENSE.txt`);
+- AI-generated original art created for this project (see `assets/ai_generated/`); and
+- *No* copyrighted Heroes 3 assets, ever.
+
+> **Status: pre-alpha MVP.** This is a tiny vertical slice — adventure-map traversal and a simplified hex-grid battle. Most of the original game (towns, magic, AI strategy, campaigns, multiplayer) is not yet implemented. See [ROADMAP.md](ROADMAP.md). The Halendor world bible and the launch campaign outline live in [LORE.md](LORE.md).
 
 ## What works in the MVP
 
@@ -58,11 +64,16 @@ scripts/
 - The damage formula lives in `scripts/battle/damage.gd`, separated from `BattleUnit` so it can be unit-tested without instantiating a full battlefield.
 - Pathfinding wraps Godot's `AStarGrid2D` so we get optimised C++ A* rather than implementing it in GDScript. Hex distance for the battlefield uses cube-coordinate conversion.
 
-## Legal
+## Legal & credits
 
-This project is licensed under [GPL-3.0](LICENSE). It contains **no** assets owned by 3DO, New World Computing, or Ubisoft. To see Heroes 3's original art and audio in the game, the user must own a copy of Heroes 3 and provide it themselves at runtime — same model as VCMI or OpenMW.
+This project is licensed under [GPL-3.0](LICENSE). It contains **no** assets owned by 3DO, New World Computing, or Ubisoft.
 
-If you are an IP holder and believe any code in this repository reproduces protected material, please open an issue and we will address it.
+**Bundled third-party art:**
+- *Medieval RTS* sprite pack by **Kenney** (https://kenney.nl/assets/medieval-rts) — licensed [CC0](https://creativecommons.org/publicdomain/zero/1.0/). Used as a placeholder baseline while AI-generated original art is rolled out. Lives under `assets/cc0/kenney_medieval_rts/`; original `LICENSE.txt` ships alongside it.
+
+**Original art generated for this project** lives under `assets/ai_generated/` and is released under the same GPL-3.0 licence as the rest of the repository. Generation prompts are recorded in [LORE.md](LORE.md) so any contributor can reproduce or replace them.
+
+If you are an IP holder and believe any code or asset in this repository reproduces protected material, please open an issue and we will address it.
 
 ## Contributing
 
