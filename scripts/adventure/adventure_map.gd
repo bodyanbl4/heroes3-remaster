@@ -308,7 +308,7 @@ func _draw() -> void:
 			var tile: Tile = _grid[y][x]
 			var origin: Vector2 = MAP_OFFSET + Vector2(x * TILE_SIZE, y * TILE_SIZE)
 			var rect: Rect2 = Rect2(origin, Vector2(TILE_SIZE, TILE_SIZE))
-			var tex: Texture2D = AssetLoader.get_terrain_tile(tile.terrain_name())
+			var tex: Texture2D = AssetLoader.get_terrain_tile(tile.terrain_name(), x + y * width)
 			draw_texture_rect(tex, rect, false)
 			_draw_tile_object(tile, origin)
 	# Path preview.
