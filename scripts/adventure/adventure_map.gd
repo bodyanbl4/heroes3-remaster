@@ -99,6 +99,8 @@ func _resolve_pending_battle_outcome() -> void:
 func _process(delta: float) -> void:
 	if _is_moving:
 		_advance_hero_movement(delta)
+	if map_camera != null:
+		map_camera.position = _hero_pixel_pos
 
 
 func _input(event: InputEvent) -> void:
