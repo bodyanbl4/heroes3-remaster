@@ -19,6 +19,7 @@ const HERO_SPEED_PX_PER_SEC: float = 320.0
 @onready var end_turn_button: Button = $HUD/Top/EndTurnButton
 @onready var menu_button: Button = $HUD/Top/MenuButton
 @onready var status_label: Label = $HUD/Bottom/StatusLabel
+@onready var map_camera: Camera2D = $MapCamera
 
 var _grid: Array
 var _pathfinder: AdventurePathfinder
@@ -43,7 +44,22 @@ func _ready() -> void:
 	_refresh_mp_label(GameState.hero_tile, GameState.hero_movement_left)
 	_refresh_day_label(GameState.current_day)
 	_resolve_pending_battle_outcome()
+	_recenter_camera_on_hero(true)
 	queue_redraw()
+
+
+## Center the camera on the hero. The first call after _ready snaps without
+## smoothing so the player doesn't see a pan from the screen origin.
+func _recenter_camera_on_hero(snap: bool = false) -> void:
+	if map_camera == null:
+		return
+	if snap:
+		map_camera.position_smoothing_enabled = false
+		map_camera.position = _hero_pixel_pos
+		map_camera.reset_smoothing()
+		map_camera.position_smoothing_enabled = true
+	else:
+		map_camera.position = _hero_pixel_pos
 
 
 ## When returning from Battlefield, GameState.last_battle_result tells us
