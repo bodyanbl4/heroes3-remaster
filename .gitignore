@@ -1,0 +1,36 @@
+# Godot 4+ specific ignores
+.godot/
+.import/
+export.cfg
+export_presets.cfg
+
+# Imported translations (automatically generated from CSV files)
+*.translation
+
+# Mono-specific ignores
+.mono/
+data_*/
+mono_crash.*.json
+
+# System / Editor / IDE files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.code-workspace
+
+# Build artifacts
+build/
+dist/
+out/
+
+# Original H3 game files MUST NEVER be committed.
+# Anything inside `h3_data/` is treated as user-supplied original assets.
+h3_data/
+
+# User local settings
+user_settings.cfg
+*.local.cfg

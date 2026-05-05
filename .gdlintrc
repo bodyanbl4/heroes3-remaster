@@ -1,0 +1,14 @@
+# gdtoolkit linter configuration
+# See https://github.com/Scony/godot-gdscript-toolkit
+disable:
+  - max-public-methods
+  - max-returns
+  - function-arguments-number
+  - max-line-length
+  - private-method-call
+  # `class-definitions-order` strictly requires @onready blocks at the
+  # bottom of the public-var section; we prefer them at the top so the
+  # node-tree contract is the first thing a reader sees.
+  - class-definitions-order
+
+# Naming rules left at defaults — they match Godot's official style guide.

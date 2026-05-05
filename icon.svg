@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <rect width="128" height="128" fill="#1a1a2e"/>
+  <path d="M64 16 L96 48 L96 96 L80 112 L48 112 L32 96 L32 48 Z" fill="#c9a04a" stroke="#8b6914" stroke-width="3"/>
+  <path d="M48 48 L80 48 L80 80 L64 96 L48 80 Z" fill="#3a3a5e" stroke="#1a1a2e" stroke-width="2"/>
+  <text x="64" y="76" font-family="serif" font-size="28" font-weight="bold" fill="#c9a04a" text-anchor="middle">H3</text>
+</svg>

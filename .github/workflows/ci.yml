@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    name: gdlint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install gdtoolkit
+        run: pip install 'gdtoolkit==4.*'
+
+      - name: Run gdformat (check-only)
+        run: gdformat --check scripts/
+
+      - name: Run gdlint
+        run: gdlint scripts/
+
+  godot-import:
+    name: Godot headless import
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot binary
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/bin/godot
+          key: godot-4.3-stable-linux
+
+      - name: Download Godot
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          curl -sSL -o /tmp/godot.zip \
+            https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_linux.x86_64.zip
+          unzip -q /tmp/godot.zip -d /tmp
+          sudo mv /tmp/Godot_v4.3-stable_linux.x86_64 /usr/local/bin/godot
+          sudo chmod +x /usr/local/bin/godot
+
+      - name: Verify Godot
+        run: godot --version
+
+      - name: Import project (headless smoke test)
+        run: |
+          # `--editor --quit` triggers a full project import then exits.
+          # On a fresh checkout this also writes .godot/, which is what we want.
+          godot --headless --editor --quit --path . 2>&1 | tee /tmp/godot.log
+          # Fail the job if Godot reported any GDScript parse errors.
+          if grep -E 'SCRIPT ERROR|Parse Error|Cannot load script' /tmp/godot.log; then
+            echo "::error::Godot reported script errors during import."
+            exit 1
+          fi
